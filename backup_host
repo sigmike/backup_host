@@ -1,16 +1,27 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
+require 'yaml'
+
 include FileUtils
 
-if ARGV.size < 3
-  raise "usage: #$0 <user@host> <identity file> <backup root directory> <backup name> <backup paths...>"
+if ARGV.size != 1
+  raise "usage: #$0 <config>"
 end
 
-host, id_file, root, name, *paths = ARGV
+config_file = ARGV.first
+config = YAML.load(File.read(config_file))
 
-paths.each do |path|
-  dest = File.join(root, path)
+remote = config["remote"]
+id_file = config["key"]
+root = config["backup_root"]
+paths = config["paths"]
+
+now = Time.now
+name = now.strftime('%Y-%m-%d_%H%M%S') + "." + now.usec.to_s
+
+paths.each do |path_name, path|
+  dest = File.join(root, path_name)
   mkpath dest
   backup_dir = File.join(dest, name)
   last_backup = File.join(dest, "last")
@@ -28,11 +39,11 @@ paths.each do |path|
     cmd += ["--link-dest", last_backup]
   end
   cmd += [
-    host + ":" + path,
+    remote + ":" + path,
     backup_dir,
   ]
 
   puts cmd.inspect
-  system *cmd
+  break unless system *cmd
   symlink(name, last_backup, :force => true)
 end
