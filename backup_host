@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+include FileUtils
+
+if ARGV.size < 3
+  raise "usage: #$0 <user@host> <identity file> <backup root directory> <backup name> <backup paths...>"
+end
+
+host, id_file, root, name, *paths = ARGV
+
+paths.each do |path|
+  dest = File.join(root, path)
+  mkpath dest
+  backup_dir = File.join(dest, name)
+  last_backup = File.join(dest, "last")
+
+  cmd = [
+    "rsync",
+    "--archive",
+    "--verbose",
+    "--one-file-system",
+    "--delete",
+    "--compress",
+    "--rsh", "ssh -i #{id_file}",
+  ]
+  if File.exists?(last_backup)
+    cmd += ["--link-dest", last_backup]
+  end
+  cmd += [
+    host + ":" + path,
+    backup_dir,
+  ]
+
+  puts cmd.inspect
+  system *cmd
+  symlink(name, last_backup, :force => true)
+end
