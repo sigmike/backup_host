@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if [ -z "$1" -o -z "$2" ]; then
+  echo "usage: $0 <user@host> <public key>"
+  exit 1
+fi
+
+key_file=$2
+key=$(<$key_file)
+
+echo $key
+
+ssh $1 <<EOF
+mkdir -p .ssh
+chmod 700 .ssh
+cd .ssh
+cat <<EOS >validate_rsync
+#!/bin/sh
+
+case "\\\$SSH_ORIGINAL_COMMAND" in
+*\&*)
+echo "Rejected"
+;;
+*\(*)
+echo "Rejected"
+;;
+*\{*)
+echo "Rejected"
+;;
+*\;*)
+echo "Rejected"
+;;
+*\<*)
+echo "Rejected"
+;;
+*\\\\\\\`*)
+echo "Rejected"
+;;
+*\|*)
+echo "Rejected"
+;;
+rsync\ --server*)
+\\\$SSH_ORIGINAL_COMMAND
+;;
+*)
+echo "Rejected"
+;;
+esac 
+EOS
+chmod +x validate_rsync
+echo "command=\"\$PWD/validate_rsync\"" $key >>authorized_keys
+chmod 600 authorized_keys
+EOF
