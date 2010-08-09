@@ -45,5 +45,6 @@ paths.each do |path_name, path|
 
   puts cmd.inspect
   break unless system *cmd
-  symlink(name, last_backup, :force => true)
+  rm last_backup
+  symlink(name, last_backup)
 end
