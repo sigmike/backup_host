@@ -1,0 +1,66 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'yaml'
+
+include FileUtils
+
+def copy_backup base, target, last_target
+  if File.exists?(last_target)
+    rm_r last_target
+  end
+  if File.exists?(target)
+    mv target, last_target
+  end
+  system "cp", "-al", base, target
+end
+
+if ARGV.size != 1
+  raise "usage: #$0 <config>"
+end
+
+config_file = ARGV.first
+config = YAML.load(File.read(config_file))
+
+remote = config["remote"]
+id_file = config["key"]
+root = config["backup_root"]
+paths = config["paths"]
+
+now = Time.now
+name = "current"
+
+paths.each do |path_name, path|
+  dest = File.join(root, path_name)
+  mkpath dest
+  backup_dir = File.join(dest, name)
+
+  cmd = [
+    "rsync",
+    "--archive",
+    "--verbose",
+    "--one-file-system",
+    "--delete",
+    "--compress",
+    "--rsh", "ssh -i #{id_file}",
+  ]
+  cmd += [
+    remote + ":" + path,
+    backup_dir,
+  ]
+
+  puts cmd.inspect
+  break unless system *cmd
+
+  if now.day == 1
+    last_target = File.join(dest, "month.last")
+    target = File.join(dest, "month")
+    copy_backup(backup_dir, target, last_target)
+  end
+
+  if now.wday == 0
+    last_target = File.join(dest, "week.last")
+    target = File.join(dest, "week")
+    copy_backup(backup_dir, target, last_target)
+  end
+end
