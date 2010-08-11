@@ -1,0 +1,10 @@
+#!/bin/sh
+
+file="$1"
+
+if [ -z "$file" ]; then
+  echo "usage: $0 <destination key file>"
+  exit 1
+fi
+
+ssh-keygen -t dsa -N "" -f "$file"
