@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'yaml'
+
+include FileUtils
+
+if ARGV.size != 1
+  raise "usage: #$0 <config>"
+end
+
+config_file = ARGV.first
+config = YAML.load(File.read(config_file))
+
+remote = config["remote"]
+id_file = config["key"]
+root = config["backup_root"]
+paths = config["paths"]
+
+paths.each do |path_name, path|
+  dest = File.join(root, path_name)
+  mkpath dest
+  backup_dir = dest
+
+  cmd = [
+    "rsync",
+    "--archive",
+    "--verbose",
+    "--one-file-system",
+    "--delete",
+    "--compress",
+    "--rsh", "ssh -i #{id_file}",
+  ]
+  cmd += [
+    remote + ":" + path,
+    backup_dir,
+  ]
+
+  system *cmd
+end
