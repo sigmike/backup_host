@@ -53,7 +53,7 @@ paths.each do |path_name, path|
     backup_dir,
   ]
 
-  puts cmd.inspect
+#  puts cmd.inspect
   break unless system *cmd
 
   target = File.join(dest, "month")
