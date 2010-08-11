@@ -42,7 +42,7 @@ paths.each do |path_name, path|
   cmd = [
     "rsync",
     "--archive",
-    "--verbose",
+#    "--verbose",
     "--one-file-system",
     "--delete-delay",
     "--compress",
