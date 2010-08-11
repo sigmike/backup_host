@@ -44,7 +44,7 @@ paths.each do |path_name, path|
     "--archive",
     "--verbose",
     "--one-file-system",
-    "--delete",
+    "--delete-delay",
     "--compress",
     "--rsh", "ssh -i #{id_file}",
   ]
