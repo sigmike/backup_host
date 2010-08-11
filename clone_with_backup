@@ -57,13 +57,13 @@ paths.each do |path_name, path|
   break unless system *cmd
 
   target = File.join(dest, "month")
-  copy_backup(backup_dir, target, last_target)
+  last_target = File.join(dest, "month.last")
   if now.day == 1 or !File.exists?(target)
-    last_target = File.join(dest, "month.last")
+    copy_backup(backup_dir, target, last_target)
   end
 
-  last_target = File.join(dest, "week.last")
   target = File.join(dest, "week")
+  last_target = File.join(dest, "week.last")
   if now.wday == 0 or !File.exists?(target)
     copy_backup(backup_dir, target, last_target)
   end
