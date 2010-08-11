@@ -16,16 +16,20 @@ def copy_backup base, target, last_target
 end
 
 if ARGV.size != 1
-  raise "usage: #$0 <config>"
+  raise "usage: #$0 <root>"
 end
 
-config_file = ARGV.first
+root = ARGV.first 
+config_file = File.join(root, "config.yml")
 config = YAML.load(File.read(config_file))
 
 remote = config["remote"]
 id_file = config["key"]
-root = config["backup_root"]
 paths = config["paths"]
+
+if paths.nil?
+  paths = { "root" => "/" }
+end
 
 now = Time.now
 name = "current"
@@ -40,7 +44,7 @@ paths.each do |path_name, path|
     "--archive",
     "--verbose",
     "--one-file-system",
-    "--delete",
+    "--delete-delay",
     "--compress",
     "--rsh", "ssh -i #{id_file}",
   ]
@@ -52,15 +56,15 @@ paths.each do |path_name, path|
   puts cmd.inspect
   break unless system *cmd
 
-  if now.day == 1
+  target = File.join(dest, "month")
+  copy_backup(backup_dir, target, last_target)
+  if now.day == 1 or !File.exists?(target)
     last_target = File.join(dest, "month.last")
-    target = File.join(dest, "month")
-    copy_backup(backup_dir, target, last_target)
   end
 
-  if now.wday == 0
-    last_target = File.join(dest, "week.last")
-    target = File.join(dest, "week")
+  last_target = File.join(dest, "week.last")
+  target = File.join(dest, "week")
+  if now.wday == 0 or !File.exists?(target)
     copy_backup(backup_dir, target, last_target)
   end
 end
