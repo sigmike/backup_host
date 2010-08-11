@@ -16,16 +16,20 @@ def copy_backup base, target, last_target
 end
 
 if ARGV.size != 1
-  raise "usage: #$0 <config>"
+  raise "usage: #$0 <root>"
 end
 
-config_file = ARGV.first
+root = ARGV.first 
+config_file = File.join(root, "config.yml")
 config = YAML.load(File.read(config_file))
 
 remote = config["remote"]
 id_file = config["key"]
-root = config["backup_root"]
 paths = config["paths"]
+
+if paths.nil?
+  paths = { "root" => "/" }
+end
 
 now = Time.now
 name = "current"
