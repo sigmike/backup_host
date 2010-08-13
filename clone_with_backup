@@ -15,11 +15,27 @@ def copy_backup base, target, last_target
   system "cp", "-al", base, target
 end
 
+require 'optparse'
+
+verbose = false
+dry_run = false
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: example.rb [options]"
+
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    verbose = v
+  end
+  opts.on("-n", "--[no-]dry-run", "Dont process") do |v|
+    dry_run = v
+  end
+end.parse!
+
 if ARGV.size != 1
-  raise "usage: #$0 <root>"
+  raise "usage: #$0 [-v] [-n] <root>"
 end
 
-root = ARGV.first 
+root = ARGV.first
 config_file = File.join(root, "config.yml")
 config = YAML.load(File.read(config_file))
 
@@ -42,18 +58,19 @@ paths.each do |path_name, path|
   cmd = [
     "rsync",
     "--archive",
-#    "--verbose",
     "--one-file-system",
     "--delete-delay",
     "--compress",
     "--rsh", "ssh -i #{id_file}",
   ]
+  cmd << "--verbose" if verbose
+  cmd << "--dry-run" if dry_run
   cmd += [
     remote + ":" + path,
     backup_dir,
   ]
 
-#  puts cmd.inspect
+  puts cmd.inspect if verbose
   break unless system *cmd
 
   target = File.join(dest, "month")
