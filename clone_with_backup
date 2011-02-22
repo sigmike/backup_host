@@ -31,6 +31,20 @@ if paths.nil?
   paths = { "root" => "/" }
 end
 
+known_hosts_file = File.expand_path("~/.ssh/known_hosts")
+if File.exists? known_hosts_file
+  known_hosts = File.read(known_hosts_file).split("\n")
+else
+  known_hosts = []
+end
+
+if known_hosts.grep(/^#{Regexp.escape remote} /).empty?
+  host_key = %x(ssh-keyscan -t rsa,dsa #{remote} 2>/dev/null)
+  puts "Adding host key #{host_key}"
+  known_hosts << host_key
+  File.open(known_hosts_file, "w") { |f| f.puts known_hosts.join("\n") }
+end
+
 now = Time.now
 name = "current"
 
