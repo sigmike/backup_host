@@ -49,6 +49,7 @@ remote = config["remote"]
 id_file = config["key"]
 paths = config["paths"]
 root = config["root"] || root
+options = config["options"]
 
 raise "No root defined" unless root
 
@@ -89,6 +90,7 @@ paths.each do |path_name, path|
   ]
   cmd << "--verbose" if verbose
   cmd << "--dry-run" if dry_run
+  cmd += options if options
   cmd += [
     remote + ":" + path,
     backup_dir,
