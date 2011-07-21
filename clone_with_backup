@@ -32,16 +32,25 @@ OptionParser.new do |opts|
 end.parse!
 
 if ARGV.size != 1
-  raise "usage: #$0 [-v] [-n] <root>"
+  raise "usage: #$0 [-v] [-n] <root|config>"
 end
 
 root = ARGV.first
-config_file = File.join(root, "config.yml")
+if File.directory? root
+  config_file = File.join(root, "config.yml")
+else
+  config_file = root
+  root = nil
+end
+
 config = YAML.load(File.read(config_file))
 
 remote = config["remote"]
 id_file = config["key"]
 paths = config["paths"]
+root = config["root"] || root
+
+raise "No root defined" unless root
 
 if paths.nil?
   paths = { "root" => "/" }
