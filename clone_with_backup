@@ -82,6 +82,7 @@ paths.each do |path_name, path|
   cmd = [
     "/usr/bin/ionice", "-c", "3",
     "/usr/bin/nice",
+    "/usr/bin/timeout", (2 * 60 * 60).to_s,
     "/usr/bin/rsync",
     "--archive",
     "--one-file-system",
