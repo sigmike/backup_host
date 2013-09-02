@@ -80,12 +80,16 @@ paths.each do |path_name, path|
   backup_dir = File.join(dest, name)
 
   cmd = [
-    "rsync",
+    "/usr/bin/ionice", "-c", "3",
+    "/usr/bin/nice",
+    "/usr/bin/rsync",
     "--archive",
     "--one-file-system",
     "--delete-delay",
     "--numeric-ids",
     "--delay-updates",
+    "--bwlimit=100",
+    # "--rsync-path='nice rsync'",
     "--rsh", "ssh -i #{id_file}",
   ]
   cmd << "--verbose" if verbose
