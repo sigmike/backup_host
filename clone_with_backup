@@ -50,6 +50,9 @@ id_file = config["key"]
 paths = config["paths"]
 root = config["root"] || root
 options = config["options"]
+timeout_hours = config["timeout_hours"] || 6
+timeout = timeout_hours * 3600
+bwlimit = config["bwlimit"] || 100
 
 raise "No root defined" unless root
 
@@ -82,14 +85,14 @@ paths.each do |path_name, path|
   cmd = [
     "/usr/bin/ionice", "-c", "3",
     "/usr/bin/nice",
-    "/usr/bin/timeout", (6 * 60 * 60).to_s,
+    "/usr/bin/timeout", timeout.to_s,
     "/usr/bin/rsync",
     "--archive",
     "--one-file-system",
     "--delete-delay",
     "--numeric-ids",
     "--delay-updates",
-    "--bwlimit=100",
+    "--bwlimit=#{bwlimit}",
     # "--rsync-path='nice rsync'",
     "--rsh", "ssh -i #{id_file}",
   ]
