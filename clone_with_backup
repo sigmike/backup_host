@@ -92,6 +92,7 @@ paths.each do |path_name, path|
     "--delete-delay",
     "--numeric-ids",
     "--delay-updates",
+    "--partial",
     "--bwlimit=#{bwlimit}",
     # "--rsync-path='nice rsync'",
     "--rsh", "ssh -i #{id_file}",
