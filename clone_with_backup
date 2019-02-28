@@ -91,7 +91,6 @@ paths.each do |path_name, path|
     "--one-file-system",
     "--delete-delay",
     "--numeric-ids",
-    "--delay-updates",
     "--partial",
     "--bwlimit=#{bwlimit}",
     # "--rsync-path='nice rsync'",
