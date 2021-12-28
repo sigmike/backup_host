@@ -105,7 +105,10 @@ paths.each do |path_name, path|
   ]
 
   puts cmd.inspect if verbose
-  break unless system *cmd
+  unless system(*cmd)
+    exit_status = $?.exitstatus
+    STDERR.puts("rsync failed (exit status #{exit_status})")
+  end
 
   target = File.join(dest, "month")
   last_target = File.join(dest, "month.last")
