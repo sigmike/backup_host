@@ -5,7 +5,7 @@ require 'yaml'
 
 include FileUtils
 
-def copy_backup base, target, last_target
+def copy_backup base, target, last_target, remove_last = false
   if File.exists?(last_target)
     rm_r last_target
   end
@@ -13,12 +13,16 @@ def copy_backup base, target, last_target
     mv target, last_target
   end
   system "cp", "-al", base, target
+  if remove_last and File.exists?(last_target)
+    rm_r last_target
+  end
 end
 
 require 'optparse'
 
 verbose = false
 dry_run = false
+remove_last = false
 
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
@@ -28,6 +32,9 @@ OptionParser.new do |opts|
   end
   opts.on("-n", "--[no-]dry-run", "Dont process") do |v|
     dry_run = v
+  end
+  opts.on("-r", "--[no-]remove-last", "Remove .last after successful backup") do |v|
+    remove_last = v
   end
 end.parse!
 
@@ -113,12 +120,12 @@ paths.each do |path_name, path|
   target = File.join(dest, "month")
   last_target = File.join(dest, "month.last")
   if now.day == 1 or !File.exists?(target)
-    copy_backup(backup_dir, target, last_target)
+    copy_backup(backup_dir, target, last_target, remove_last)
   end
 
   target = File.join(dest, "week")
   last_target = File.join(dest, "week.last")
   if now.wday == 0 or !File.exists?(target)
-    copy_backup(backup_dir, target, last_target)
+    copy_backup(backup_dir, target, last_target, remove_last)
   end
 end
