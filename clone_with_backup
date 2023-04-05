@@ -22,7 +22,6 @@ require 'optparse'
 
 verbose = false
 dry_run = false
-remove_last = false
 
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
@@ -32,9 +31,6 @@ OptionParser.new do |opts|
   end
   opts.on("-n", "--[no-]dry-run", "Dont process") do |v|
     dry_run = v
-  end
-  opts.on("-r", "--[no-]remove-last", "Remove .last after successful backup") do |v|
-    remove_last = v
   end
 end.parse!
 
@@ -60,6 +56,7 @@ options = config["options"]
 timeout_hours = config["timeout_hours"] || 6
 timeout = timeout_hours * 3600
 bwlimit = config["bwlimit"] || 100
+remove_last = config["remove_last"] || false
 
 raise "No root defined" unless root
 
